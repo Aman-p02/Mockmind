@@ -1,5 +1,5 @@
 "use client";
-
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { motion } from "framer-motion";
@@ -7,9 +7,32 @@ import Link from "next/link";
 import { Target, Trophy, TrendingUp, Calendar, ArrowRight, Building2, Briefcase, FileText, Code2, Users } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { MagicCard } from "@/components/ui/magic-card";
+import api from "@/lib/api";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const [recentInterviews, setRecentInterviews] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalInterviews: 0,
+    averageScore: 0,
+    bestScore: 0,
+    streak: 0
+  });
+
+  useEffect(() => {
+    if (user) {
+      // Fetch history
+      api.get("/api/dashboard/history").then((res) => {
+        setRecentInterviews(res.data);
+        if (res.data.length > 0) {
+          const scores = res.data.map((i: any) => i.score);
+          const max = Math.max(...scores);
+          const avg = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
+          setStats(prev => ({ ...prev, totalInterviews: res.data.length, bestScore: max, averageScore: avg, streak: 1 }));
+        }
+      }).catch(console.error);
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -18,12 +41,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const recentInterviews = [
-    { id: "1", topic: "On-Campus: Standard", score: 8.5, date: "2 days ago", type: "On-Campus" },
-    { id: "2", topic: "Frontend Developer", score: 7.2, date: "5 days ago", type: "Off-Campus" },
-    { id: "3", topic: "System Design", score: 6.8, date: "1 week ago", type: "Off-Campus" },
-  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -44,10 +61,10 @@ export default function DashboardPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
-            { label: "Total Interviews", value: <NumberTicker value={12} className="text-white" />, icon: <Target className="w-5 h-5 text-blue-400" /> },
-            { label: "Average Score", value: <><NumberTicker value={7.8} decimalPlaces={1} className="text-white" />/10</>, icon: <TrendingUp className="w-5 h-5 text-green-400" /> },
-            { label: "Best Score", value: <><NumberTicker value={9.2} decimalPlaces={1} className="text-white" />/10</>, icon: <Trophy className="w-5 h-5 text-yellow-400" /> },
-            { label: "Current Streak", value: <><NumberTicker value={3} className="text-white" /> Days</>, icon: <Calendar className="w-5 h-5 text-orange-400" /> },
+            { label: "Total Interviews", value: <NumberTicker value={stats.totalInterviews} className="text-white" />, icon: <Target className="w-5 h-5 text-blue-400" /> },
+            { label: "Average Score", value: <><NumberTicker value={stats.averageScore} decimalPlaces={1} className="text-white" />/10</>, icon: <TrendingUp className="w-5 h-5 text-green-400" /> },
+            { label: "Best Score", value: <><NumberTicker value={stats.bestScore} decimalPlaces={1} className="text-white" />/10</>, icon: <Trophy className="w-5 h-5 text-yellow-400" /> },
+            { label: "Current Streak", value: <><NumberTicker value={stats.streak} className="text-white" /> Days</>, icon: <Calendar className="w-5 h-5 text-orange-400" /> },
           ].map((stat, i) => (
             <motion.div
               key={i}

@@ -76,7 +76,11 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+          <div className={`mb-4 p-3 rounded-lg border text-sm text-center ${
+            error.startsWith("Success") 
+              ? "bg-green-500/10 border-green-500/20 text-green-400" 
+              : "bg-red-500/10 border-red-500/20 text-red-400"
+          }`}>
             {error}
           </div>
         )}

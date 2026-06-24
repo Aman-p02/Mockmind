@@ -67,14 +67,20 @@ function SetupForm() {
           setLoading(false);
           return;
         }
-        const formData = new FormData();
-        formData.append("type", "off-campus");
-        formData.append("role", role);
-        formData.append("mode", mode);
-        formData.append("resume", resumeFile);
 
-        res = await api.post("/api/interview/start-offcampus", formData, {
+        // 1. Upload and parse resume
+        const formData = new FormData();
+        formData.append("resume", resumeFile);
+        formData.append("targetDomain", role);
+
+        await api.post("/api/resume/analyze", formData, {
           headers: { "Content-Type": "multipart/form-data" }
+        });
+
+        // 2. Start Interview
+        res = await api.post("/api/interview/start-offcampus", {
+          domain: role,
+          mode
         });
       }
 

@@ -50,9 +50,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Protect routes
-    const publicRoutes = ["/", "/login", "/register"];
-    if (!loading && !token && !publicRoutes.includes(pathname)) {
-      router.push("/login");
+    if (!loading) {
+      const isPublicRoute = pathname === "/" || pathname.startsWith("/login") || pathname.startsWith("/register");
+      
+      if (!token && !isPublicRoute) {
+        router.push("/login");
+      } else if (token && (pathname.startsWith("/login") || pathname.startsWith("/register"))) {
+        router.push("/dashboard");
+      }
     }
   }, [token, loading, pathname, router]);
 

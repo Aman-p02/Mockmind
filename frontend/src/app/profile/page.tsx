@@ -14,9 +14,49 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/api/user/profile")
-      .then((res) => {
-        setProfileData(res.data);
+    Promise.all([
+      api.get("/api/user/profile"),
+      api.get("/api/dashboard/history")
+    ])
+      .then(([profileRes, historyRes]) => {
+        const pData = profileRes.data;
+        const history = historyRes.data || [];
+        
+        const scores = history.map((h: any) => h.score || 0);
+        const max = scores.length > 0 ? Math.max(...scores) : 0;
+        const avg = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+
+        const progressData = history.slice().reverse().map((h: any, i: number) => ({
+          name: `Int ${i + 1}`,
+          score: h.score || 0
+        }));
+
+        const topicMap: any = {};
+        history.forEach((h: any) => {
+          if (!topicMap[h.topic]) topicMap[h.topic] = { total: 0, count: 0 };
+          topicMap[h.topic].total += (h.score || 0);
+          topicMap[h.topic].count += 1;
+        });
+
+        const topicPerformance = Object.keys(topicMap).map(k => ({
+          topic: k,
+          score: Math.round(topicMap[k].total / topicMap[k].count)
+        }));
+
+        const favoriteTopic = topicPerformance.length > 0 ? topicPerformance.sort((a,b) => b.count - a.count)[0]?.topic : 'N/A';
+
+        setProfileData({
+          ...pData,
+          memberSince: new Date(pData.created_at || Date.now()).getFullYear(),
+          totalInterviews: history.length,
+          averageScore: avg.toFixed(1),
+          bestScore: max,
+          favoriteTopic: favoriteTopic || 'N/A',
+          strengths: ["Clear Communication", "Problem Solving"],
+          improvements: ["Advanced System Design", "Optimization"],
+          progressData: progressData.length > 0 ? progressData : [{ name: 'Int 1', score: 0 }],
+          topicPerformance: topicPerformance.length > 0 ? topicPerformance : [{ topic: 'General', score: 0 }]
+        });
         setLoading(false);
       })
       .catch((error) => {
@@ -90,7 +130,7 @@ export default function ProfilePage() {
               <div className="bg-card border border-border rounded-2xl p-6">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-green-500" /> Top Strengths</h3>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.strengths.map((s: string, i: number) => (
+                  {(profileData?.strengths || []).map((s: string, i: number) => (
                     <span key={i} className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded-lg text-sm">{s}</span>
                   ))}
                 </div>
@@ -98,7 +138,7 @@ export default function ProfilePage() {
               <div className="bg-card border border-border rounded-2xl p-6">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-orange-500" /> Areas to Improve</h3>
                 <div className="flex flex-wrap gap-2">
-                  {profileData.improvements.map((s: string, i: number) => (
+                  {(profileData?.improvements || []).map((s: string, i: number) => (
                     <span key={i} className="px-3 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-lg text-sm">{s}</span>
                   ))}
                 </div>

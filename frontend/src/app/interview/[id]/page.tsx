@@ -21,6 +21,7 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [answer, setAnswer] = useState("");
+  const [totalQuestions, setTotalQuestions] = useState(5);
 
   useEffect(() => {
     // In text mode, we use `answer` state.
@@ -41,6 +42,7 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
           answer: t.answer
         }));
         setQuestions(mappedQuestions);
+        setTotalQuestions(res.data.type === 'on-campus' ? 11 : 5);
         
         const nextUnanswered = mappedQuestions.findIndex((q: any) => !q.answer);
         if (nextUnanswered !== -1) {
@@ -120,7 +122,7 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
   }
 
   const currentQuestion = questions[currentIndex];
-  const progress = ((currentIndex) / questions.length) * 100;
+  const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -132,7 +134,7 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
           <div className="container mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="text-sm font-medium text-gray-400">
-                Question <span className="text-foreground">{currentIndex + 1}</span> of {questions.length}
+                Question <span className="text-foreground">{currentIndex + 1}</span> of {totalQuestions}
               </div>
               <div className="w-32 h-2 bg-background rounded-full overflow-hidden border border-border">
                 <div 
@@ -201,7 +203,7 @@ export default function InterviewPage({ params }: { params: Promise<{ id: string
               className="flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-bold text-primary-foreground shadow-lg hover:bg-primary/90 hover:shadow-primary/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             >
               {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-5 h-5" />}
-              {currentIndex === questions.length - 1 ? "Finish Interview" : "Submit Answer"}
+              {currentIndex === totalQuestions - 1 ? "Finish Interview" : "Submit Answer"}
             </button>
           </div>
         </div>
