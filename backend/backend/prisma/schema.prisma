@@ -1,0 +1,127 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  schemas   = ["public"]
+}
+model Profile {
+  id             String             @id @db.Uuid
+  name           String
+  email          String             @unique
+  college        String?
+  degree         String?
+  branch         String?
+  placement_type String?            // 'On-Campus' | 'Off-Campus'
+  created_at     DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?          @default(now()) @db.Timestamptz(6)
+  aptitude       AptitudeResult[]
+  dsa            DSAResult[]
+  fundamentals   FundamentalsResult[]
+  resumes        ResumeAnalysis[]
+  interviews     Interview[]
+  progress       ProgressTracking[]
+
+  @@map("profiles")
+  @@schema("public")
+}
+
+model AptitudeResult {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String   @db.Uuid
+  topic         String
+  difficulty    String?  // 'Easy' | 'Medium' | 'Hard'
+  score         Int
+  accuracy      Float?
+  topic_mastery String?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  profile       Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("aptitude_results")
+  @@schema("public")
+}
+
+model DSAResult {
+  id                 String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id            String   @db.Uuid
+  topic              String
+  difficulty         String?
+  score              Int
+  correctness_score  Int?
+  logic_score        Int?
+  complexity_feedback String?
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  profile            Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("dsa_results")
+  @@schema("public")
+}
+
+model FundamentalsResult {
+  id              String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id         String   @db.Uuid
+  category        String   // e.g., OOP, DBMS, OS, CN, SQL
+  score           Int
+  readiness_score Int?
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  profile         Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("fundamentals_results")
+  @@schema("public")
+}
+
+model ResumeAnalysis {
+  id                   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id              String   @db.Uuid
+  resume_url           String?
+  ats_score            Int?
+  resume_quality_score Int?
+  missing_skills       Json?
+  missing_keywords     Json?
+  suggestions          String?
+  parsed_content       String?
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  profile              Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("resume_analysis")
+  @@schema("public")
+}
+
+model Interview {
+  id                       String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                  String   @db.Uuid
+  type                     String?  // 'Technical' | 'HR' | 'Off-Campus'
+  domain                   String?
+  score                    Int?
+  technical_accuracy_score Int?
+  problem_solving_score    Int?
+  concept_clarity_score    Int?
+  communication_score      Int?
+  confidence_score         Int?
+  professionalism_score    Int?
+  feedback                 String?
+  transcript               Json?
+  created_at               DateTime? @default(now()) @db.Timestamptz(6)
+  profile                  Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("interviews")
+  @@schema("public")
+}
+
+model ProgressTracking {
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String   @db.Uuid
+  readiness_score  Int?
+  aptitude_avg     Int?
+  dsa_avg          Int?
+  fundamentals_avg Int?
+  resume_score     Int?
+  technical_avg    Int?
+  hr_avg           Int?
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  profile          Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("progress_tracking")
+  @@schema("public")
+}
