@@ -89,7 +89,7 @@ function SetupForm() {
       } else {
         setLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to start interview", error);
       const backendError = error.response?.data?.error;
       alert(backendError || "Failed to start interview. Please check your connection.");
