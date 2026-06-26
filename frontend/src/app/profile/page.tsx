@@ -148,29 +148,7 @@ export default function ProfilePage() {
 
           {/* Right Column: Charts & History */}
           <div className="lg:col-span-2 space-y-8">
-            
-            {/* Progress Chart */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-card border border-border rounded-3xl p-6 md:p-8"
-            >
-              <h2 className="text-xl font-bold mb-6">Score Progress</h2>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={profileData.progressData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                    <XAxis dataKey="name" stroke="#888" tick={{fill: '#888'}} axisLine={false} tickLine={false} />
-                    <YAxis domain={[0, 10]} stroke="#888" tick={{fill: '#888'}} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', borderRadius: '12px' }}
-                      itemStyle={{ color: '#3b82f6' }}
-                    />
-                    <Line type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={4} dot={{ r: 6, fill: '#111', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 8, fill: '#3b82f6' }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </motion.div>
+
 
             {/* Topic Performance Chart */}
             <motion.div
@@ -184,7 +162,7 @@ export default function ProfilePage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={profileData.topicPerformance} layout="vertical" margin={{ left: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
-                    <XAxis type="number" domain={[0, 10]} stroke="#888" axisLine={false} tickLine={false} />
+                    <XAxis type="number" domain={[0, 100]} stroke="#888" axisLine={false} tickLine={false} />
                     <YAxis dataKey="topic" type="category" stroke="#888" axisLine={false} tickLine={false} width={100} />
                     <Tooltip
                       contentStyle={{ backgroundColor: '#1a1a1a', borderColor: '#333', borderRadius: '12px' }}

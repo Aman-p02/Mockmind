@@ -100,3 +100,21 @@ export const getDashboardHistory = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch history' });
     }
 };
+
+export const clearHistory = async (req: AuthRequest, res: Response) => {
+    try {
+        const { error } = await supabase
+            .from('interviews')
+            .delete()
+            .eq('user_id', req.user.id);
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json({ message: 'History cleared successfully' });
+    } catch (err) {
+        console.error('Clear History Error:', err);
+        res.status(500).json({ error: 'Failed to clear history' });
+    }
+};

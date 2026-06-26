@@ -241,7 +241,7 @@ export const NavbarLogo = () => {
       className="relative z-20 flex items-center gap-2"
     >
       <div className="flex items-center justify-center">
-        <img src="/logo.png" alt="Mockmind Logo" className="w-12 h-12 object-contain" />
+        <Image src="/logo.png" alt="Mockmind Logo" width={48} height={48} className="object-contain" />
       </div>
       <span className="text-2xl font-black tracking-tight text-white leading-none">Mockmind</span>
     </a>

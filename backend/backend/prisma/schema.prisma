@@ -125,3 +125,16 @@ model ProgressTracking {
   @@map("progress_tracking")
   @@schema("public")
 }
+
+model Question {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category      String    // 'Aptitude', 'DSA', 'DBMS', 'OS', 'HR', 'Technical'
+  domain        String?   // 'Backend', 'Frontend', 'Fullstack', etc. (Only for Technical)
+  difficulty    String?   // 'Easy', 'Medium', 'Hard'
+  question_text String
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("questions")
+  @@schema("public")
+}
+

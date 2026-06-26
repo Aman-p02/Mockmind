@@ -20,18 +20,16 @@ export const startOffCampusInterview = async (req: AuthRequest, res: Response) =
             return res.status(400).json({ error: 'Please upload and analyze your resume first to start an off-campus interview.' });
         }
 
-        // 2. Generate the first question based on resume and domain
-        const prompt = `
-      You are an interviewer for an off-campus placement drive for the domain "${domain}".
-      Based on the user's resume content below, generate the first highly technical interview question.
-      Resume Content: ${resumeAnalysis.parsed_content}
-      
-      RULE 1: You MUST ONLY ask strictly technical questions related to ${domain}.
-      RULE 2: DO NOT ask any HR, behavioral, or college-related questions under any circumstances.
-      Focus on the user's projects or skills mentioned in the resume that are relevant to ${domain}.
-      Return as JSON: { "question": "..." }
-    `;
-        const { question } = await AIService.generateContent(prompt);
+        const { data: questions, error: qError } = await supabase
+            .from('questions')
+            .select('question_text')
+            .eq('domain', domain); // Fetch all to pick randomly from
+
+        let question = "Can you explain your experience and how it makes you a good fit for this role?"; // Fallback
+        if (!qError && questions && questions.length > 0) {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            question = questions[randomIndex].question_text;
+        }
 
         // 3. Create the interview record
         const { data, error } = await supabase

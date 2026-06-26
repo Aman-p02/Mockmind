@@ -5,13 +5,18 @@ import { motion } from "framer-motion";
 import { Bot, Mic, Code, LineChart, ArrowRight, CheckCircle2, UserCog, TrendingUp } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { AuroraBackground } from "@/components/ui/aurora-background";
-import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { SquigglyText } from "@/components/ui/squiggly-text";
-import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
-import ColourfulText from "@/components/ui/colourful-text";
-import { Button as MovingBorder } from "@/components/ui/moving-border";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+
+const AuroraBackground = dynamic(() => import("@/components/ui/aurora-background").then(m => m.AuroraBackground), { ssr: false });
+const CardBody = dynamic(() => import("@/components/ui/3d-card").then(m => m.CardBody), { ssr: false });
+const CardContainer = dynamic(() => import("@/components/ui/3d-card").then(m => m.CardContainer), { ssr: false });
+const CardItem = dynamic(() => import("@/components/ui/3d-card").then(m => m.CardItem), { ssr: false });
+const HoverBorderGradient = dynamic(() => import("@/components/ui/hover-border-gradient").then(m => m.HoverBorderGradient), { ssr: false });
+const SquigglyText = dynamic(() => import("@/components/ui/squiggly-text").then(m => m.SquigglyText), { ssr: false });
+const TextGenerateEffect = dynamic(() => import("@/components/ui/text-generate-effect").then(m => m.TextGenerateEffect), { ssr: false });
+const ColourfulText = dynamic(() => import("@/components/ui/colourful-text"), { ssr: false });
+const MovingBorder = dynamic(() => import("@/components/ui/moving-border").then(m => m.Button), { ssr: false });
 
 export const features = [
   {
@@ -193,7 +198,7 @@ export default function Home() {
                   >
                     {item.customImage && (
                       <div className="flex justify-center mb-6">
-                        <img src={item.customImage} alt={item.title} className="w-16 h-16 md:w-20 md:h-20 object-contain" />
+                        <Image src={item.customImage} alt={item.title} width={80} height={80} className="object-contain" />
                       </div>
                     )}
                     <h3 className="text-xl md:text-2xl font-bold text-white mb-3">{item.title}</h3>

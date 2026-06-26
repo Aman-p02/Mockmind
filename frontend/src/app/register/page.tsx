@@ -69,7 +69,7 @@ export default function RegisterPage() {
       >
         <div className="flex flex-col items-center mb-8">
           <div className="mb-4">
-            <img src="/logo.png" alt="Mockmind Logo" className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+            <Image src="/logo.png" alt="Mockmind Logo" width={96} height={96} className="object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
           <p className="text-sm text-gray-400 mt-2">Join MockAI and start practicing</p>

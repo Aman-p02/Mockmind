@@ -14,12 +14,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setMessage("");
+    setLoading(true);
 
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -33,10 +35,13 @@ export default function LoginPage() {
 
       login(data.session.access_token, profileRes.data);
     } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+      setError(err.message || "Failed to login. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-x-hidden p-4 sm:p-8">
@@ -58,7 +63,7 @@ export default function LoginPage() {
       >
         <div className="flex flex-col items-center mb-8">
           <div className="mb-4">
-            <img src="/logo.png" alt="Mockmind Logo" className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+            <Image src="/logo.png" alt="Mockmind Logo" width={96} height={96} className="object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
           <p className="text-sm text-gray-400 mt-2">Enter your credentials to access your account</p>
@@ -67,6 +72,11 @@ export default function LoginPage() {
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
             {error}
+          </div>
+        )}
+        {message && (
+          <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm text-center">
+            {message}
           </div>
         )}
 
@@ -86,7 +96,6 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-300">Password</label>
-              <Link href="#" className="text-xs text-primary hover:underline">Forgot password?</Link>
             </div>
             <input
               type="password"

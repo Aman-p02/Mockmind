@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Target, Trophy, TrendingUp, Calendar, ArrowRight, Building2, Briefcase, FileText, Code2, Users } from "lucide-react";
+import { Target, Trophy, TrendingUp, Calendar, ArrowRight, Building2, Briefcase, FileText, Code2, Users, Trash2 } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { MagicCard } from "@/components/ui/magic-card";
 import api from "@/lib/api";
@@ -34,6 +34,19 @@ export default function DashboardPage() {
     }
   }, [user]);
 
+  const handleClearHistory = async () => {
+    if (confirm("Are you sure you want to delete all your interview history? This cannot be undone.")) {
+      try {
+        await api.delete("/api/dashboard/history");
+        setRecentInterviews([]);
+        setStats({ totalInterviews: 0, averageScore: 0, bestScore: 0, streak: 0 });
+      } catch (error) {
+        console.error("Failed to clear history", error);
+        alert("Failed to clear history");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -62,8 +75,8 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
             { label: "Total Interviews", value: <NumberTicker value={stats.totalInterviews} className="text-white" />, icon: <Target className="w-5 h-5 text-blue-400" /> },
-            { label: "Average Score", value: <><NumberTicker value={stats.averageScore} decimalPlaces={1} className="text-white" />/10</>, icon: <TrendingUp className="w-5 h-5 text-green-400" /> },
-            { label: "Best Score", value: <><NumberTicker value={stats.bestScore} decimalPlaces={1} className="text-white" />/10</>, icon: <Trophy className="w-5 h-5 text-yellow-400" /> },
+            { label: "Average Score", value: <><NumberTicker value={stats.averageScore} decimalPlaces={1} className="text-white" />/100</>, icon: <TrendingUp className="w-5 h-5 text-green-400" /> },
+            { label: "Best Score", value: <><NumberTicker value={stats.bestScore} decimalPlaces={1} className="text-white" />/100</>, icon: <Trophy className="w-5 h-5 text-yellow-400" /> },
             { label: "Current Streak", value: <><NumberTicker value={stats.streak} className="text-white" /> Days</>, icon: <Calendar className="w-5 h-5 text-orange-400" /> },
           ].map((stat, i) => (
             <motion.div
@@ -168,7 +181,17 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Recent History</h2>
-              <Link href="/profile" className="text-sm text-primary hover:underline">View all</Link>
+              <div className="flex items-center gap-4">
+                {recentInterviews.length > 0 && (
+                  <button 
+                    onClick={handleClearHistory} 
+                    className="text-sm text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" /> Clear
+                  </button>
+                )}
+                <Link href="/profile" className="text-sm text-primary hover:underline">View all</Link>
+              </div>
             </div>
             <div className="bg-card/50 border border-border/50 rounded-2xl overflow-hidden backdrop-blur-sm">
               {recentInterviews.map((interview, i) => (
@@ -185,11 +208,11 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <span className={`text-xs font-bold px-2 py-1 rounded-md ${
-                      interview.score >= 8 ? "bg-green-500/20 text-green-400" :
-                      interview.score >= 6 ? "bg-yellow-500/20 text-yellow-400" :
+                      interview.score >= 80 ? "bg-green-500/20 text-green-400" :
+                      interview.score >= 60 ? "bg-yellow-500/20 text-yellow-400" :
                       "bg-red-500/20 text-red-400"
                     }`}>
-                      {interview.score}/10
+                      {interview.score}/100
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-xs text-gray-500 mt-2">

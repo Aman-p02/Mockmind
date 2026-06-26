@@ -7,13 +7,28 @@ export const startInterview = async (req: AuthRequest, res: Response) => {
     const { type, domain } = req.body; // type: 'Technical' | 'HR' | 'Off-Campus'
 
     try {
-        let prompt = `Generate a ${type} interview question ${domain ? `for the domain ${domain}` : ''}. Return as JSON: { "question": "..." }`;
-        
+        let category = 'Technical';
+        let qDomain = domain || null;
+
         if (type === 'on-campus') {
-            prompt = `You are starting an on-campus placement interview. Round 1 is Aptitude. Generate a medium difficulty Aptitude question. Return as JSON: { "question": "..." }`;
+            category = 'Aptitude';
+            qDomain = null;
+        } else if (type === 'HR') {
+            category = 'HR';
         }
 
-        const { question } = await AIService.generateContent(prompt);
+        let query = supabase.from('questions').select('question_text').eq('category', category);
+        if (qDomain) {
+            query = query.eq('domain', qDomain);
+        }
+
+        const { data: questions, error: qError } = await query;
+        let question = "Can you introduce yourself and tell me about your background?";
+        
+        if (!qError && questions && questions.length > 0) {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            question = questions[randomIndex].question_text;
+        }
 
         // 2. Create the interview record in DB
         const { data, error } = await supabase
@@ -73,52 +88,57 @@ export const submitInterviewAnswer = async (req: AuthRequest, res: Response) => 
         const limit = interview.type === 'on-campus' ? 11 : 5;
         
         if (transcript.length < limit) {
-            let prompt = `Based on the interview so far, generate the next logical ${interview.type} question. Previous Transcript: ${JSON.stringify(transcript)}. Return as JSON: { "question": "..." }`;
-            
+            let category = "Technical";
+            let qDomain = null;
+            let transition = "";
+
             if (interview.type === 'Off-Campus') {
-                prompt = `Based on the interview so far, generate the next highly technical question. 
-                RULE 1: You MUST ONLY ask strictly technical questions related to ${interview.domain}.
-                RULE 2: DO NOT ask any HR, behavioral, or college-related questions under any circumstances.
-                Previous Transcript: ${JSON.stringify(transcript)}. 
-                Return as JSON: { "question": "..." }`;
+                qDomain = interview.domain;
             } else if (interview.type === 'on-campus') {
-                const len = transcript.length; // Number of questions asked so far (including the one just answered)
-                let phase = "";
-                let transition = "";
+                const len = transcript.length; // Number of questions asked so far
                 
                 if (len < 3) {
-                    phase = "Aptitude";
+                    category = "Aptitude";
                 } else if (len === 3) {
-                    phase = "Data Structures and Algorithms (DSA)";
+                    category = "DSA";
                     transition = "Great, that concludes the Aptitude round. Let's move on to Data Structures and Algorithms. ";
                 } else if (len < 5) {
-                    phase = "Data Structures and Algorithms (DSA)";
+                    category = "DSA";
                 } else if (len === 5) {
-                    phase = "Database Management Systems (DBMS)";
+                    category = "DBMS";
                     transition = "Let's move to Database concepts. ";
                 } else if (len < 7) {
-                    phase = "Database Management Systems (DBMS)";
+                    category = "DBMS";
                 } else if (len === 7) {
-                    phase = "Operating Systems (OS)";
+                    category = "OS";
                     transition = "Moving on to Operating Systems. ";
                 } else if (len < 9) {
-                    phase = "Operating Systems (OS)";
+                    category = "OS";
                 } else if (len === 9) {
-                    phase = "HR and Behavioral";
+                    category = "HR";
                     transition = "That concludes the technical rounds. Let's wrap up with a few HR questions. ";
                 } else {
-                    phase = "HR and Behavioral";
+                    category = "HR";
                 }
-                
-                prompt = `You are conducting an on-campus placement interview. The current round is: ${phase}. 
-                ${transition ? `The previous round just ended. Start your question with: "${transition}"` : ''}
-                Based on the interview so far, generate the NEXT question specifically for the ${phase} round. Do not repeat previous questions.
-                Previous Transcript: ${JSON.stringify(transcript)}. 
-                Return as JSON: { "question": "..." }`;
             }
 
-            const nextQResponse = await AIService.generateContent(prompt);
-            nextQuestion = nextQResponse.question;
+            let query = supabase.from('questions').select('question_text').eq('category', category);
+            if (qDomain) {
+                query = query.eq('domain', qDomain);
+            }
+
+            const { data: qData, error: qError } = await query;
+            const askedQuestions = transcript.map((t: any) => t.question);
+            
+            let selectedQuestion = "Can you explain your experience in detail?";
+            if (!qError && qData && qData.length > 0) {
+                const availableQs = qData.filter(q => !askedQuestions.includes(q.question_text) && !askedQuestions.includes(transition + q.question_text));
+                const pool = availableQs.length > 0 ? availableQs : qData; 
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                selectedQuestion = pool[randomIndex].question_text;
+            }
+
+            nextQuestion = transition + selectedQuestion;
             transcript.push({ question: nextQuestion, answer: null, evaluation: null });
         }
 
