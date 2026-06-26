@@ -40,10 +40,11 @@ export default function ProfilePage() {
 
         const topicPerformance = Object.keys(topicMap).map(k => ({
           topic: k,
-          score: Math.round(topicMap[k].total / topicMap[k].count)
+          score: Math.round(topicMap[k].total / topicMap[k].count),
+          count: topicMap[k].count
         }));
 
-        const favoriteTopic = topicPerformance.length > 0 ? topicPerformance.sort((a,b) => b.count - a.count)[0]?.topic : 'N/A';
+        const favoriteTopic = topicPerformance.length > 0 ? [...topicPerformance].sort((a,b) => b.count - a.count)[0]?.topic : 'N/A';
 
         setProfileData({
           ...pData,
