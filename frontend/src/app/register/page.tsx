@@ -42,7 +42,7 @@ export default function RegisterPage() {
          return;
       }
 
-      login(data.session.access_token, { id: data.user.id, email, name });
+      login(data.session.access_token, { id: data.user?.id || "", email, name });
     } catch (err: any) {
       setError(err.message || "Registration failed");
       setLoading(false);
