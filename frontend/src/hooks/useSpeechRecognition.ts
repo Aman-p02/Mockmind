@@ -6,6 +6,7 @@ export function useSpeechRecognition() {
   const [text, setText] = useState("");
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const finalTranscriptRef = useRef<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -17,14 +18,15 @@ export function useSpeechRecognition() {
         recognition.lang = "en-US";
 
         recognition.onresult = (event: any) => {
-          let currentTranscript = "";
-          for (let i = 0; i < event.results.length; ++i) {
-            currentTranscript += event.results[i][0].transcript;
+          let interimTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscriptRef.current += event.results[i][0].transcript + " ";
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
           }
-          // Note: In continuous mode with interimResults, this replaces the whole text block. 
-          // If the user manually edited `text` while recording, it might be overwritten.
-          // In a real app, you'd manage cursor positions, but this is fine for an MVP.
-          setText(currentTranscript);
+          setText((finalTranscriptRef.current + interimTranscript).trim());
         };
 
         recognition.onerror = (event: any) => {
@@ -43,6 +45,7 @@ export function useSpeechRecognition() {
 
   const startListening = useCallback(() => {
     setText("");
+    finalTranscriptRef.current = "";
     setIsListening(true);
     try {
       recognitionRef.current?.start();
