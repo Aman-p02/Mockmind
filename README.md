@@ -1,5 +1,6 @@
 # 🚀 Mockmind - AI-Based Mock Interview Platform
 
+You Can Try it Out From Here : https://mockmind-one.vercel.app/
 Mockmind is an intelligent mock interview platform designed to help candidates prepare for their dream jobs. It simulates real-world interview scenarios using advanced AI and provides comprehensive feedback to improve candidate readiness.
 
 ## 🌟 Key Features
